@@ -1,0 +1,166 @@
+import random
+
+class FarklePlayer:
+    def __init__(self, name):
+        self.name = name
+        self.score = 0
+
+class FarkleDice:
+    def __init__(self):
+        self.dice = [0, 0, 0, 0, 0, 0]
+
+    def roll_dice(self):
+        self.dice = [random.randint(1, 6) for _ in range(6)]
+        return self.dice
+
+class FarkleGame:
+    def __init__(self, winning_score=10000):
+        self.players = []
+        self.current_player = None
+        self.winning_score = winning_score
+        self.dice = FarkleDice()
+
+    def get_player_names(self):
+        num_players = int(input("Enter the number of players: "))
+        for i in range(num_players):
+            name = input(f"Enter name for Player {i+1}: ")
+            self.players.append(FarklePlayer(name))
+
+    def display_rules(self):
+        print("\n********************************************************************************")
+        print("*                             Welcome to Farkle!                                 *")
+        print("********************************************************************************")
+        print("Rules:")
+        print("1. Each player's turn starts by rolling all six dice.")
+        print("2. Score points based on the combinations rolled (see scoring rules).")
+        print("3. Choose to bank points or continue rolling.")
+        print("4. If no scoring dice are rolled, the turn ends with no points (Farkle).")
+        print("5. The game continues until a player reaches the winning score.")
+        print("Scoring:")
+        print("Single 1: 100 points")
+        print("Single 5: 50 points")
+        print("Three of a kind: 100 times the face value of the die")
+        print("Four of a kind: 1000 times the face value of the die")
+        print("Five of a kind: 2000 times the face value of the die")
+        print("Six of a kind: 3000 times the face value of the die")
+        print("Straight (1-6): 1500 points")
+        print("Three pairs: 1500 points")
+        print("Example: 1-1-1-5-5-5 scores 1050 points")
+        print("Winning score is 10,000 points")
+        print("Let's start!\n")
+        print("********************************************************************************")
+
+    def display_turn_info(self):
+        print("\n********************************************************************************")
+        print(f"*                                 {self.current_player.name}'s turn                               *")
+        print("********************************************************************************")
+        print(f"* Total Score: {self.current_player.score: <72} *")
+        print(f"* Dice: {', '.join(map(str, self.dice.dice)): <68} *")
+        print("********************************************************************************")
+
+    def roll_dice(self):
+        return self.dice.roll_dice()
+
+    def get_scoring_dice(self, dice):
+        scoring_dice = {'1': 0, '5': 0}
+        for die in dice:
+            if die == 1:
+                scoring_dice['1'] += 1
+            elif die == 5:
+                scoring_dice['5'] += 1
+        return scoring_dice
+
+    def calculate_score(self, dice):
+        score = 0
+        scoring_dice = self.get_scoring_dice(dice)
+        if scoring_dice['1'] == 1:
+            score += 100
+        elif scoring_dice['1'] == 2:
+            score += 200
+        elif scoring_dice['1'] == 3:
+            score += 1000
+        elif scoring_dice['1'] == 4:
+            score += 2000
+        elif scoring_dice['1'] == 5:
+            score += 3000
+        elif scoring_dice['1'] == 6:
+            score += 4000
+
+        if scoring_dice['5'] == 1:
+            score += 50
+        elif scoring_dice['5'] == 2:
+            score += 100
+        elif scoring_dice['5'] == 3:
+            score += 500
+        elif scoring_dice['5'] == 4:
+            score += 1000
+        elif scoring_dice['5'] == 5:
+            score += 1500
+        elif scoring_dice['5'] == 6:
+            score += 2000
+
+        for num in range(1, 7):
+            if dice.count(num) >= 3:
+                if num == 1:
+                    score += 1000 * (dice.count(num) - 2)
+                else:
+                    score += 100 * num * (dice.count(num) - 2)
+
+        if len(set(dice)) == 6:
+            score += 1500
+        elif len(set(dice)) == 3 and all(dice.count(num) == 2 for num in set(dice)):
+            score += 1500
+
+        return score
+
+    def take_turn(self):
+        dice_rolled = self.roll_dice()
+        print("\n********************************************************************************")
+        print(f"* {self.current_player.name} rolled: {', '.join(map(str, dice_rolled)): <59} *")
+        score = self.calculate_score(dice_rolled)
+
+        if score == 0:
+            print("* Farkle! No scoring combinations. Turn ends with no points.                *")
+            print("********************************************************************************")
+            return 0
+        print("To stop playing press exit")
+        choice = input("Roll again (r) or end turn (e)? ")
+        while choice.lower() not in ('r', 'e'):
+            print("Invalid choice. Please enter 'r' to roll again or 'e' to end turn.")
+            choice = input("Roll again (r) or end turn (e)? ")
+
+        if choice.lower() == 'exit':
+            exit()
+        if choice.lower() == 'r':
+            self.current_player.score += score
+            return self.take_turn()
+        elif choice.lower() == 'e':
+            self.current_player.score += score
+            print(f"* Turn ended. Total score for this turn: {self.current_player.score: <51} *")
+            print("********************************************************************************")
+            return score
+
+    def play_game(self):
+        self.get_player_names()
+        self.display_rules()
+        while all(player.score < self.winning_score for player in self.players):
+            for player in self.players:
+                self.current_player = player
+                self.display_turn_info()
+                self.take_turn()
+
+        max_score = max(player.score for player in self.players)
+        winners = [player for player in self.players if player.score == max_score]
+        print("\n********************************************************************************")
+        if len(winners) == 1:
+            print(f"* {winners[0].name} wins with {max_score} points!                                      *")
+        else:
+            print("* It's a tie between:                                                            *")
+            for winner in winners:
+                print(f"* {winner.name: <75} *")
+        print("* Game over. Thanks for playing!                                                  *")
+        print("********************************************************************************")
+
+# Test the game
+game = FarkleGame()
+game.play_game()
