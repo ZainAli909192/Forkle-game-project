@@ -1,5 +1,19 @@
 import random
 
+class Player:
+    def __init__(self):
+        self.inventory = []
+
+    def add_item(self, item):
+        self.inventory.append(item)
+
+    def remove_item(self, item):
+        if item in self.inventory:
+            self.inventory.remove(item)
+            return item
+        else:
+            return None
+
 class Room:
     def __init__(self, name, description, exits, items=None):
         self.name = name
@@ -56,19 +70,7 @@ class Room:
         print("Description:", self.description)
         print("Exits:", ", ".join(self.exits.keys()))
 
-class Player:
-    def __init__(self):
-        self.inventory = []
 
-    def add_item(self, item):
-        self.inventory.append(item)
-
-    def remove_item(self, item):
-        if item in self.inventory:
-            self.inventory.remove(item)
-            return item
-        else:
-            return None
 
 class Game:
     def __init__(self):
