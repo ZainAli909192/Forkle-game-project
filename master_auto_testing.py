@@ -2,6 +2,9 @@ import unittest
 from unittest.mock import patch
 from mastermind import HumanPlayer
 
+if __name__ == "__main__":
+    unittest.main()
+
 class TestTwoPlayers(unittest.TestCase):
     def test_make_secret_code(self):
         player1 = HumanPlayer("Player 1")
@@ -31,5 +34,3 @@ class TestTwoPlayers(unittest.TestCase):
             guess = player2.make_guess()
         self.assertEqual(guess, "6789")
 
-if __name__ == "__main__":
-    unittest.main()
